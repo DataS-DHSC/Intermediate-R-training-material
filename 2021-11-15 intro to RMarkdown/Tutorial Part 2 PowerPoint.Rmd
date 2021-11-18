@@ -1,0 +1,134 @@
+---
+title: "RMarkdown Tutorial 2 PowerPoint "
+author: "Tom Dougall"
+date: "14/11/2021"
+output: 
+  powerpoint_presentation:
+    reference_doc: DHSC_template.pptx
+---
+
+<!-- If you do not have access to the template document please change the YAML above to -->
+
+<!-- output:  -->
+<!--   powerpoint_presentation: default -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Powerpoint Structuring
+
+## PowerPoint RMarkdown
+
+As with documents, RStudio will create you a template to start from including your YAML and some code chunks. Much of the markdown we have used so far for formatting text and code are the same for PowerPoint, such as bolds and italics.
+
+However structuring your presentation is different as PowerPoint uses hierarchy of title, section, and content slides whereas markdown documents have a hierarchy of headers and content. When creating your document, it will try to determine how to interpret your use of #s. 
+
+## RStudios explanation of how structure is determined
+
+By default, the slide level is set to the highest header level in the hierarchy that is followed immediately by markdown content somewhere in the document. Once determined, the markdown document is carved up into slides according the the following rules:
+
+- Headers at the slide level always starts a new slide
+- Headers above the slide level in the hierarchy create section headers
+- Headers below the slide level in the hierarchy create headers within a slide
+- A horizontal rule always starts a new slide
+- A title page is constructed automatically from the document’s title (i.e. YAML) block
+
+
+[Source: RStudio website](https://support.rstudio.com/hc/en-us/articles/360004672913-Rendering-PowerPoint-Presentations-with-the-RStudio-IDE?__cf_chl_captcha_tk__=qxRPP1ylOXE2m0z..myT9pBQkd8_fVL17j67IMQzWxQ-1636901144-0-gaNycGzNCCU#structuring-the-presentation)
+
+
+## Example Structure 1
+
+```
+# Section header (Slide 2)
+
+## Section header (Slide 3)
+
+### Slide Title (Slide 4)
+
+Slide Content (by default this content sets the slide level to three)
+
+#### Slide content header (Slide 4)
+
+```
+
+## Example Structure 2
+
+```
+# Section header (Slide 2)
+
+## Slide Title (Slide 3)
+
+Slide Content (by default this content sets the slide level to two)
+
+### Slide content header (Slide 3)
+
+#### Slide content header (Slide 3)
+
+```
+
+## Example Structure 3
+
+```
+# Section header (Slide 2)
+
+## Section header (Slide 3)
+
+### Section header (Slide 4)
+
+#### Section header (Slide 5)
+
+##### Slide Title (Slide 6)
+
+Slide Content (by default this content sets the slide level to five)
+
+```
+
+## Default style
+ 
+The default style will be a blank presentation in a 4:3 size. To style our presentation we can add a custom theme as we did with our documents. The DHSC PowerPoint Template can be found on the intranet, which we implement with familiar syntax.
+
+```
+
+output: 
+  powerpoint_presentation:
+    reference_doc: DHSC_template.pptx
+```
+
+## Images and tables
+
+Images will be automatically skilled to fit the slide and can be rendered from the web or from a local file.
+
+```
+
+# image from file
+![caption](local_file)
+
+# image from web
+![caption](URL)
+
+```
+
+Tables will pick up the default styling of your template
+
+
+\```{r PP-Table-Example}    
+knitr::kable(head(cars))    
+\```    
+
+```{r PP-Table-Example}
+knitr::kable(head(cars))
+```
+
+
+## Exercise 4
+
+* Create a new RMarkdown script that will output to a PowerPoint Presentation
+* Download the DHSC template.
+* Set your PowerPoint theme to the DHSC template
+* Give your presentation a section header: 'The fox's great adventure'
+* Tell us where he went after his trip to Pisa in the next slide with a suitable title.
+* Download, or use a web link to show where the fox went next on his adventure.
+
+

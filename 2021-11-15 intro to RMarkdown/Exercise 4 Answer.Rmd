@@ -1,0 +1,23 @@
+---
+title: "Exercise 4 Answer"
+author: "Tom Dougall"
+date: "14/11/2021"
+output: 
+  powerpoint_presentation:
+    reference_doc: DHSC_template.pptx
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+### The fox's great adventure
+
+#### London
+
+After the disappointing trip to the too *leaning* tower of Pisa, he went to visit the Tower of London.
+
+![Tower of London](Tower_of_London_from_the_Shard_(8515883950).jpg)
+
+<!-- Note: This image is downloaded from wikipedia -->
+

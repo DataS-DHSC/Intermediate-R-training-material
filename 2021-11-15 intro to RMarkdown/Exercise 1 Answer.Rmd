@@ -1,0 +1,25 @@
+---
+title: "Exercise 1 Answers"
+author: "Tom Dougall"
+date: "09/11/2021"
+output: html_document
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+# A fox's holiday
+
+The **bold** fox went to visit the tower of Pisa but found it too *leaning*.
+
+
+# petal plot
+
+
+```{r }    
+data(iris)
+
+plot(iris$Sepal.Length, iris$Sepal.Width)    
+```    

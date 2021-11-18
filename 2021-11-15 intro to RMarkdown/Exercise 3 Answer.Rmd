@@ -1,0 +1,33 @@
+---
+title: "Exercise 2 Answers"
+author: "Tom Dougall"
+date: "`r Sys.Date()`"
+output:
+  word_document:
+    toc: yes
+  html_document:
+    theme: cerulean
+    toc: yes
+    code_folding: hide
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# A fox's holiday
+
+The **bold** fox went to visit the tower of Pisa on `r Sys.Date() - 65` but found it too *leaning*.
+
+
+# petal plot
+
+
+```{r petal-plot, include=TRUE, fig.cap = "A plot showing the relationship beetween petal lengths and widths", fig.width = 10, fig.height=5}    
+data(iris)
+
+plot(iris$Sepal.Length, iris$Sepal.Width)    
+```    
+ 
+ 
