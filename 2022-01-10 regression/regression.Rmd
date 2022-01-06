@@ -1,0 +1,184 @@
+---
+title: "(Tidy) Regression in R"
+author: "DHSC Analytical Community"
+date: "2021-01-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Intro
+
+
+## Required packages
+
+- tidyverse
+- NHANES
+- broom
+
+Other:
+
+- Additional dataset located with the coursenotes on [the DHSC Data Science GitHub](https://github.com/DataS-DHSC/Intermediate-R-training-material).
+
+## Acknowledgements
+
+I've drawn on these sources to produce these notes. They deserve my thanks, and can be used for further reading:
+
+- [broom & dplyr vignette](https://cran.r-project.org/web/packages/broom/vignettes/broom_and_dplyr.html)
+- [Moderndive textbook](https://moderndive.com/5-regression.html). This mostly goes into machine learning, but starts with general data wrangling and linear regression.
+- [The previous iteration of this course](https://datas-dhsc.github.io/R_for_Survey_Analysis/regression-model.html)
+
+# Before doing a regression
+
+*Explore your data and determine what regression is suitable before doing it.*
+
+```{r message=FALSE, warning=FALSE}
+library("tidyverse")
+library("broom")
+library("NHANES") # Health dataset
+
+theme_set(theme_minimal())
+
+go = read_csv("data/go.csv") # Example dataset for this point.
+bike = read_csv("data/bike.csv")  # Example "messy" dataset. 
+
+```
+
+[In this paper students were asked to do a regression](https://www.biorxiv.org/content/10.1101/2020.07.30.228916v1), but they should have looked at the data first:
+
+
+```{r}
+go %>%
+  ggplot(aes(x=steps, y=bmi, colour=group)) + geom_point()
+```
+
+If you believe that extreme values don't happen, verify it.
+
+```{r}
+bike %>% 
+  ggplot(aes(x=heart_rate, y=power)) + geom_point()
+```
+
+I'm certain my heart didn't stop during this bike ride, so maybe the logger treats a pause as 0 beats-per-minute?
+
+```{r}
+bike %>% 
+  ggplot(aes(x=time, y=heart_rate)) + geom_point() 
+
+```
+
+
+Let's remove 0-values:
+
+```{r}
+bike = bike %>% 
+  mutate(heart_rate = if_else(heart_rate == 0, NA_real_, heart_rate)) %>% 
+  mutate(power = if_else(power == 0, NA_real_, power))
+
+bike %>% 
+  ggplot(aes(x=heart_rate, y=power)) + geom_point()
+```
+
+That looks like something we could do a regression on.
+
+# Doing Regression
+
+For a lot of purposes we can let ggplot handle the whole process:
+
+```{r}
+data = NHANES %>% 
+  filter(Age >= 18) %>% 
+  filter(BPSysAve > 0, BPDiaAve > 0) %>% 
+  filter(!is.na(BPSysAve), !is.na(BPDiaAve))
+
+data %>% 
+  ggplot(aes(y=BPSysAve, x=BPDiaAve)) + geom_point() + geom_smooth(method = "lm")
+```
+
+Which works nicely with other ggplot methods, like splitting plots by a categorical variable:
+
+```{r}
+data %>% 
+    ggplot(aes(x=Age, y=Testosterone)) +
+     geom_point() + 
+     facet_wrap("Gender", scales = "free_y") + 
+     geom_smooth(method = "lm")
+```
+
+The giant line of people aged 80, and nobody aged above 80 suggests to me that they censored old age with a cutoff of 80. You could filter for age <80 to keep only the uncensored ages, make a reasonable guess at their average age based on life tables, or leave them in at 80. There looks to be few enough of these people, and this is a tutorial, that I'll go with the latter. 
+
+Before we get into the fiddly regression stats, we can see that there's a fairly strong positive relationship between diastolic and systolic blood pressure. (The big number and little number when you get it read.) (For reference, high blood pressure is when the big number is >140, OR the little number >90.)
+
+You might get this far and see that the line is basically flat, so you might stop the analysis there and start building the narrative: 
+
+
+```{r}
+set.seed(20220110) # Fixing a random seed for reproducibility
+
+tibble(x = 1:1000, y=runif(1000)) %>% 
+  ggplot(aes(x=x,y=y)) + 
+   geom_point() +
+   geom_smooth(method = "lm") 
+
+```
+
+
+# More numbers, less pictures
+
+```{r}
+lmfit = lm(BPSysAve~BPDiaAve, data = data)
+lmfit
+```
+
+```{r}
+summary(lmfit)
+```
+
+Neither of these look good in the document, and you might be tempted to make a note of these values then manually write them down for further analysis. {broom} gives us methods to 'tidy' these objects, making working with them a bit easier:
+
+
+The `tidy` function gives the key stats about the components of the model:
+
+```{r}
+tidy(lmfit) %>% 
+  knitr::kable()
+```
+
+`augment` attaches stats to the original data. (I have sampled 10 rows of the data since the original is 7178 rows.)
+
+```{r}
+augment(lmfit) %>% 
+  slice_sample(n = 10) %>% 
+  knitr::kable()
+```
+
+For example, we can plot the residuals:
+
+```{r}
+augment(lmfit) %>% 
+  ggplot(aes(x=.resid)) + geom_histogram(binwidth = 5)
+```
+
+There's a bit of a long tail to the right, so I've not picked a brilliant example. Since the residuals are attached to the original data, we can look at whether there's a bias with the x-values:
+
+
+```{r}
+augment(lmfit) %>% 
+  ggplot(aes(x=BPDiaAve, y=.resid)) + geom_point(alpha = 0.5)
+```
+
+`glance` turns our model into a 1-row tibble of model summaries, mostly goodness-of-fit stats. 
+
+
+```{r}
+glance(lmfit) %>% 
+  knitr::kable()
+```
+
+# Live demo
+
+Instead of "here's one I prepared earlier" I'm going to attempt some live-coding on the bike dataset.
+
+These courses can end up "here's a path from A to B" rather than "here's how I found a path from A to B", so I believe there's value in letting you all watch over my shoulder as I go through the processes, look up help files, make mistakes...
